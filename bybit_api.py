@@ -12,7 +12,8 @@ print("Bybit API module loaded successfully")
 
 def test_connection():
     try:
-        response = session.get_wallet_balance(accountType="UNIFIED")
+        response = session.get_server_time()
         return response
+
     except Exception as e:
         return str(e)
