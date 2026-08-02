@@ -1,4 +1,3 @@
-
 from config import BOT_NAME
 from notifier import send_message
 import bybit_api
