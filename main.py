@@ -1,13 +1,14 @@
 from config import BOT_NAME
 from notifier import send_message
-import bybit_api
+from bybit_api import test_connection
 
 print(f"🚀 {BOT_NAME} Starting...")
 
-try:
-    response = send_message(f"🚀 {BOT_NAME} is now ONLINE!")
-    print(response)
-except Exception as e:
-    print("Telegram Error:", e)
+response = test_connection()
+
+print("Bybit Response:")
+print(response)
+
+send_message(f"🚀 {BOT_NAME} is ONLINE!")
 
 print("✅ Startup completed successfully.")
