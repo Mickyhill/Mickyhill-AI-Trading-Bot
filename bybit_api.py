@@ -10,10 +10,12 @@ session = HTTP(
 print("Bybit API module loaded successfully")
 
 
-def test_connection():
-    try:
-        response = session.get_server_time()
-        return response
+def get_server_time():
+    return session.get_server_time()
 
-    except Exception as e:
-        return str(e)
+
+def get_ticker(symbol="BTCUSDT"):
+    return session.get_tickers(
+        category="linear",
+        symbol=symbol
+    )
