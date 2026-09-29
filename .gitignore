@@ -1,4 +1,13 @@
 .env
-pycache/
 venv/
+.venv/
+__pycache__/
+__pycache__.zip
 *.db
+*.db-*
+paper_trades*
+trade_log.csv
+historical_data/
+validation_report*
+main_backup*.py
+bybit_api copy.py

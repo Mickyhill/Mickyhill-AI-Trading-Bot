@@ -1,24 +1,48 @@
-import os
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
+from config import (
+    TELEGRAM_BOT_TOKEN,
+    TELEGRAM_CHAT_ID,
+)
 
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-
+# ==========================================
+# SEND TELEGRAM MESSAGE
+# ==========================================
 
 def send_message(message):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
-    data = {
-        "chat_id": CHAT_ID,
-        "text": message
+    if (
+        not TELEGRAM_BOT_TOKEN
+        or
+        not TELEGRAM_CHAT_ID
+    ):
+        print("❌ Telegram credentials missing.")
+        return
+
+    url = (
+        f"https://api.telegram.org/bot"
+        f"{TELEGRAM_BOT_TOKEN}"
+        f"/sendMessage"
+    )
+
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": message,
+        "parse_mode": "Markdown"
     }
 
-    response = requests.post(url, data=data)
+    try:
 
-    return response.json()
+        response = requests.post(
+            url,
+            json=payload,
+            timeout=20
+        )
 
+        response.raise_for_status()
 
-print("Telegram notifier loaded successfully.")
+        print("✅ Telegram message sent.")
+
+    except Exception as e:
+
+        print(f"❌ Telegram Error: {e}")
