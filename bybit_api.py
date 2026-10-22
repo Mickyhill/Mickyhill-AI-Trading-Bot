@@ -5,6 +5,8 @@
 # Single Bybit API connection layer.
 # ==========================================
 
+import time
+
 from pybit.unified_trading import HTTP
 import config
 from retry_helper import retry_on_network_error
@@ -130,6 +132,27 @@ def get_all_symbols(limit=None):
 
 
 # ==========================================
+# CANDLE LENGTHS
+#
+# Candle length in milliseconds, keyed by
+# Bybit's interval code. Used by get_kline()
+# to detect the still-forming candle.
+# ==========================================
+
+INTERVAL_MS = {
+    "1": 60_000,
+    "3": 180_000,
+    "5": 300_000,
+    "15": 900_000,
+    "30": 1_800_000,
+    "60": 3_600_000,
+    "120": 7_200_000,
+    "240": 14_400_000,
+    "D": 86_400_000,
+}
+
+
+# ==========================================
 # GET KLINE
 #
 # IMPORTANT: returns candles in Bybit's NATIVE
@@ -138,6 +161,15 @@ def get_all_symbols(limit=None):
 # newest-first input and reverses it internally.
 # Reversing in both places double-reverses the
 # data and silently corrupts every indicator.
+#
+# CLOSED CANDLES ONLY: Bybit always puts the
+# current, still-forming candle first. That
+# candle has partial volume and an unfinished
+# close, which made the live volume filter
+# reject almost everything and pushed every
+# indicator away from what the backtest saw.
+# get_kline() drops the forming candle, so live
+# scanning only sees closed candles.
 # ==========================================
 
 def get_kline(symbol, interval, limit=250):
@@ -155,6 +187,22 @@ def get_kline(symbol, interval, limit=250):
         .get("result", {})
         .get("list", [])
     )
+
+    step = INTERVAL_MS.get(str(interval))
+
+    if step is None:
+        print(
+            f"⚠️ get_kline: unknown interval {interval}, "
+            f"forming candle NOT removed"
+        )
+
+    elif rows:
+        now_ms = int(time.time() * 1000)
+
+        # rows[0] is the newest candle. If its period
+        # hasn't finished yet, drop the candle.
+        if int(rows[0][0]) + step > now_ms:
+            rows = rows[1:]
 
     return rows
 

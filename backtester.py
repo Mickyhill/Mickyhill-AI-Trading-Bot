@@ -30,6 +30,19 @@
 # symbols this tick (that doesn't already have an open
 # trade) is opened, exactly like scan_market() does.
 # Exits are TP2-only, matching the fixed paper_monitor.py.
+#
+# LOOK-AHEAD FIX (closed candles only):
+#
+# A tick's timestamp is the START of a 15m candle. The
+# decision for that tick happens when the 15m candle
+# CLOSES, 15 minutes later. The old version picked the
+# 1H and 4H candle whose START was at or before the tick,
+# so a 1H candle up to 45 minutes from finishing (and a
+# 4H candle up to 3h45m from finishing) got used, closing
+# price included. The strategy saw prices from the future.
+# get_direction_at() now only uses 1H and 4H candles that
+# have fully closed by the decision time, matching the
+# live bot after the bybit_api.get_kline() closed-candle fix.
 # ==========================================
 
 
@@ -132,7 +145,7 @@ LOOKBACK_DAYS = 120
 # 180 days ago, so you can check whether the strategy performs
 # differently in a different market regime (e.g. an uptrend period)
 # rather than only ever testing the most recent stretch.
-END_OFFSET_DAYS = 120
+END_OFFSET_DAYS = 0
 
 # Extra history fetched BEFORE the test window so
 # indicators (EMA50, ADX, etc.) have enough data to
@@ -158,6 +171,12 @@ ROUND_TRIP_FEE_PCT = 0.0012  # 0.12%
 
 def ms(days):
     return int(days * 24 * 60 * 60 * 1000)
+
+
+# Candle lengths in milliseconds
+MS_15M = 15 * 60 * 1000
+MS_1H = 60 * 60 * 1000
+MS_4H = 4 * 60 * 60 * 1000
 
 
 def sort_oldest_first(rows):
@@ -383,8 +402,13 @@ def get_direction_at(data, index_15m, timestamp):
     try:
         w15 = window_ending_at(data["15m"], index_15m)
 
-        idx_1h = find_index_at_or_before(data["1h"], timestamp)
-        idx_4h = find_index_at_or_before(data["4h"], timestamp)
+        # The decision happens when the 15m candle starting at
+        # `timestamp` closes. A higher-timeframe candle only counts
+        # if it has closed by then: start + length <= decision time.
+        decision_ms = timestamp + MS_15M
+
+        idx_1h = find_index_at_or_before(data["1h"], decision_ms - MS_1H)
+        idx_4h = find_index_at_or_before(data["4h"], decision_ms - MS_4H)
 
         if idx_1h == -1 or idx_4h == -1:
             return None, None, None

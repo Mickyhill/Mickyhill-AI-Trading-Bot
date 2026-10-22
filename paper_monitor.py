@@ -120,6 +120,7 @@ Status: CLOSED
             print(f"⚠️ Could not write trade_log.csv row for {trade.get('trade_id')}: {exc}")
 
     def _close_at_stop(self, trade, price):
+        price = float(trade["stop_loss"])
         accounting = calculate_paper_pnl(
             trade, price, PAPER_ROUND_TRIP_FEE_RATE
         )
@@ -188,6 +189,7 @@ Status: CLOSED
             trade["targets_hit"] = list(hit_targets)
 
             if target_name == "TP2":
+                price = target_price
                 accounting = calculate_paper_pnl(
                     trade, price, PAPER_ROUND_TRIP_FEE_RATE
                 )
