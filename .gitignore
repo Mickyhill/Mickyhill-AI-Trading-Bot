@@ -7,7 +7,7 @@ __pycache__.zip
 *.db-*
 paper_trades*
 trade_log.csv
-historical_data/
+historical_data*/
 validation_report*
 main_backup*.py
 bybit_api copy.py

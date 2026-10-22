@@ -30,7 +30,7 @@ def evaluate_setup(a15, a1h, a4h, btc_direction):
     # -----------------------------
 
     if a1h["DIRECTION"] == "WAIT":
-        return None, "No clear 1H direction"
+        return None, f"No clear 1H direction (ADX {a1h['ADX']:.1f})"
 
     if (
         a4h["DIRECTION"] != "WAIT"
