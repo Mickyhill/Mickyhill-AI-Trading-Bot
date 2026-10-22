@@ -38,7 +38,7 @@ Report genuine defects. Skip style, formatting, naming, and personal taste.
 
 1. Security: SQL injection, command injection, path traversal, XSS, SSRF,
    broken authentication, missing or wrong authorization checks (for example a
-   student reaching an admin or rep route), exposed secrets, insecure input
+   normal user reaching an admin-only route), exposed secrets, insecure input
    handling, unsafe deserialization, weak password or token handling.
 2. Architecture: logic in the wrong layer, duplicated logic that will drift,
    design choices that break existing patterns in this codebase.
