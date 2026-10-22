@@ -1,0 +1,24 @@
+# Tests for the Claude PR review tooling. No secrets, no API calls.
+name: Claude review self-test
+
+on:
+  pull_request:
+    paths:
+      - ".github/claude-review/**"
+      - ".github/workflows/claude-pr-review.yml"
+      - ".github/workflows/claude-review-selftest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Run tests
+        run: node --test .github/claude-review/tests/*.test.mjs
